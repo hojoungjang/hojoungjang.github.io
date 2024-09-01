@@ -1,0 +1,38 @@
+---
+layout: post
+title:  "Prologue"
+date:   2024-08-17 14:00:00 +0900
+categories: personal
+---
+### Welcome to my blog!
+
+This is my first blog post. Here I mainly aim to write things about the learnings I am doing.
+They will be anything related to software engineering and computer science.
+The posts will be written either in English or Korean but I have a feeling it will be pretty random, so I apologize to anyone wishing to read something here that one may fail to interpret.
+
+### Why am I starting this blog?
+
+TLDR: I want to be consistent with my learnings and become more confident with my skills.
+
+Long story...
+
+A few months back I quit my first software engineering job.
+I am so glad that I had the opportunity to work at the heart of silicon valley, and
+although I know I tried so hard to get this job putting hours and hours of hard work for the past few years in college, 
+I felt things were falling apart and that's when I thought I would take some break. 
+
+Working as a software engineer, I had some challenges with my work velocity. My team adopted agile methodology which basically helps the team to be productive as much as possible. 
+
+At the same time, we had many hurdles: monolithic code base, slow and flaky CI, and legacy parts of the code base that are hard to make changes and even understand. 
+
+At the time, I lacked the experience and knowledge to properly recognize these as bad developer experience and engineering practices and communicate these with the team to improve our experience working with our code base.
+
+Rather I took the brute force approach and tried to overcome these hurdles by putting more time and effort into my work. Working like this for months, I was too overwhelmed by the whole process. I was blindly stretching one task after another and only after some time, I realized this approach will not scale. 
+
+Work was no fun anymore and even depressing. I felt like I was wasting time at work and at the same time, I was too overwhelmed outside work to examine my current situation properly.
+
+So, I ended up quitting my job and spending time to decide what I want to do next.Having done this for a couple months now, the biggest challenge is evaluating and prioritizing vast amount of information that spans across different areas of software engineering which is broad and rapidly changing field.
+
+Then, I decided to get some inspiration from successful engineers if they have any practices or habits. I mainly referenced some books and blog posts from some of the software engineers and one of the common things I found was to build fundamental knowledge/skills (plus keep track of the learnings).
+
+So this blog will be it 🤞.

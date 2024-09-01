@@ -1,0 +1,99 @@
+---
+layout: post
+title:  "깃 커밋 메세지 수정"
+date:   2024-08-21 15:57:00 +0900
+categories: git
+---
+# 깃 커밋 메세지는 어떻게 수정할까?
+가끔 작업을 하다보면 깃 커밋 메세지를 수정해야 할 때가 있을 수 있다. 물론 커밋이 리모트에 푸쉬가 안되었다면 우리는 `git reset` 을 통해 다시 commit 을 하나 하나 할 수 있다.
+
+```sh
+git reset --soft HEAD~N
+```
+여기서 `HEAD~` 다음에 오는 숫자 `N` 은 마지막에서 N 개의 커밋을 삭제 시켜준다. 예를 들어 `git reset --soft HEAD~1` 은 마지막 커밋만 삭제 시켜준다. 이때 해당 커밋안에 있던 변경내용은 스테이지 된상태로 커밋만 없어진다.
+
+하지만 커밋이 이미 리모트에 푸쉬가 되어있다면 우리는 `git commit --amend` 를 사용 할 수 있다. 이 말은 즉슨 깃 커밋 어멘드는 커밋 히스토리를 재작성하게 된다. 만약 다른 팀원들이 의존하고 있는 커밋을 재작성하게 된다면 팀원들이 개인의 로컬에서 하는 작업에 차질이 생길 수 있으니 확인 후 조심히 사용해야 한다. 하지만 어떤 변경사항을 만들 때 보통 개인 브랜치에서 작업을 수행하니 특수한 경우를 제외하면 안전할 것 이다.
+
+필자의 경우 코드를 작성한 리포지토리에서 모든 커밋에 대한 [sign off](https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---signoff) 를 요구하고 있어서 커밋 메세지 수정을 위해 이 방법을 사용하였다.
+
+## 제일 마지막 커밋 수정하는 법
+제일 마지막에 작성한 커밋을 수정하는 방법은 위에서 언급한 amend 플래그를 활용하는 것 이다. 이때 스테이지한 코드변경 사항이 있으면 포함이된다. 만약 단순히 메세지만 재작성 하는 것이라면 아무 변경사항이 없는 상태에서 깃 커맨드를 실행하면 된다. 실행 직후에는 텍스트 에디터가 열리며 해당 커밋의 메세지를 수정 할 수 있다.
+```sh
+git commit --amend
+```
+
+만약 필자처럼 sign off 를 하는경우, `-s` 플래그를 추가해주면 된다.
+```sh
+git commit -s --amend
+```
+
+## 다른 커밋 또는 두개 이상의 커밋 수정
+만약 수정하고 싶은 커밋이 마지막이 아닌경우나 두개 이상일 경우, 추가적으로 수행해야 하는 작업이 생긴다.
+
+먼저 `git rebase` 를 interactive 모드로 실행한다.
+
+```sh
+git rebase -i HEAD~N
+```
+여기서 `N` 은 마지막 N 개의 커밋을 말한다. 그러므로 수정하고 싶은 커밋이 이 범위안에 존재해야 한다. 
+
+위 커멘드를 실행하면 텍스트 에디터가 열리고 아래와 같은 형태의 텍스트가 있을 것 이다.
+```
+pick f7f3f6d changed my name a bit
+pick 310154e updated README formatting and added blame
+pick a5f4a0d added cat-file
+
+# Rebase 710f0f8..a5f4a0d onto 710f0f8
+#
+# Commands:
+#  p, pick = use commit
+#  r, reword = use commit, but edit the commit message
+#  e, edit = use commit, but stop for amending
+#  s, squash = use commit, but meld into previous commit
+#  f, fixup = like "squash", but discard this commit's log message
+#  x, exec = run command (the rest of the line) using shell
+#
+# These lines can be re-ordered; they are executed from top to bottom.
+#
+# If you remove a line here THAT COMMIT WILL BE LOST.
+#
+# However, if you remove everything, the rebase will be aborted.
+#
+# Note that empty commits are commented out
+```
+
+여기서 첫번째 N개의 라인은 본인이 리베이스 하기로 선택한 커밋들이 아래 형태로 작성되어있다.
+```
+pick <commit hash> <commit message>
+```
+
+여기서 수정하고 싶은 커밋들은 `pick` 을 `edit` 으로 바꿔주면 되겠다.
+모두 변경과 저장후 에디터를 종료하면 edit 을 표기해준 각각의 커밋을 순차적으로 보여주며 해당 메세지를 보여준다.
+
+```
+Stopped at <commit hash>... <commit message>
+You can amend the commit now, with
+
+       git commit --amend
+
+Once you’re satisfied with your changes, run
+
+       git rebase --continue
+```
+
+맨처음 살펴보았던 마지막 커밋 수정하는 경우와 동일하게 변경사항을 추가할 수 있다. 커밋 메세지 변경만 하는 경우 `git commit --amend` 를 실행해서 에디터를 통해 변경한다. 그 다음 `git rebase --continue` 를 실행하면 다음 커밋으로 넘어간다.
+
+이대로 모든 커밋을 수정하면 끝이다.
+
+## 수정후 git push
+`git commit --amend`를 했을 경우 이전에 언급했던 대로 커밋 히스토리가 덮어쓰여지기 때문에 단순히 `git push` 를 할 경우 거절당하는 것을 확인 할 수 있을 것이다. 이 경우, 강제 푸쉬를 진행해야한다. 두가지 방법이 있는데 하나는 `--force` 다른 하나는 `--force-with-lease`. 간단히 설명하면 둘다 동일하게 force push 를 해주지만, `--force-with-lease` 는 푸쉬하기전 리모트에 새로운 커밋이 푸쉬되어있는지 확인해주고 그럴경우 우리의 푸쉬를 거절한다.
+
+그러므로 번거롭더라도 `--force-with-lease` 를 사용한 방법이 좀 더 안전한 습관이 될 수 있겠다.
+
+## 마무리
+마지막으로 커밋 수정 방법을 구글링해서 여러군데 찾아보았지만 역시 공식 문서에 거의 90% 내용이 하나의 페이지로 작성이 되어있다는걸 마지막에 보았다.
+공식문서를 애용 할 수 있는 습관을 들여보는 것도 좋겠다. 참고용으로 링크를 추가하겠다.
+
+공식: https://git-scm.com/book/id/v2/Git-Tools-Rewriting-History
+
+추가 자료: https://medium.com/@sahilsahilbhatia/git-push-force-with-lease-vs-force-ecae72601e80
