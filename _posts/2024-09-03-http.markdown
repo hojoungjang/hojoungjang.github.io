@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "HTTP Versions"
-date:   2024-09-03 11:07:00 +0900
+date:   2024-09-03 11:00:00 +0900
 categories: network
 ---
 # What is HTTP?
