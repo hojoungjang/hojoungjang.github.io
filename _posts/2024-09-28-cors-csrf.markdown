@@ -1,0 +1,56 @@
+---
+layout: post
+title:  "CORS & CSRF"
+date:   2024-09-19 14:14:00 +0900
+categories: web, security
+---
+웹 프레임워크 배우다 보면 보안과 관련된 여러 약자를 마주하게 된다. 
+보통 요청이나 응답 헤더에서 볼 수 있는데 정확히 이해하고 있지 않은것 같아서 좀 더 알아보는 시간을 가졌다.
+
+# CORS - Cross Origin Resource Sharing
+CORS 는 서로 다른 origin 을 가지는 클라이언트와 서버가 자원을 공유 할 수 있게 해준다.
+여기서 origin 은 도메인, 프로토콜, 포트의 조합이다. 
+```
+https://www.example.com:8080
+
+* 도메인: www.example.com
+* 프로토콜: https
+* 포트: 8080
+```
+
+그리고 자원은 우리가 흔히 HTTP 통신에서 주고 받을 수 있는 데이터나 파일이다. 예를 들어 HTML, CSS, Javascript, JSON, 이미지 같은 static assets.
+
+흔히 로컬에서 프런트엔드 앱과 백엔드 웹서버를 각각의 포트에서 실행시키고 프런트엔드에서 백엔드 API 에 요청을 보냈을 경우, 웹서버에서 크로스 오리진 요청을 받을 수 있도록 설정이 되지 않았다면 CORS 에러를 볼 수 있다.
+
+![CORS error message](/assets/images/cors-error.png)
+
+만약 요청을 받는 서버쪽에서 크로스 오리진 요청을 허용하고 싶으면 서버에서 해당 자원에 대한 응답 헤더에 `Access-Control-Allow-Origin` 값을 포함시키도록 해주어야 한다.
+
+`Access-Control-Allow-Origin` 값으로는 보통 두가지 값을 사용한다.
+* `*` 은 와일드카드이다. 모든 외부 origin으로부터 CORS 를 허용한다
+* 다른 값으로는 허용하고 싶은 origin을 명시하는 것이다 (ex. `https://www.example.com`)
+
+하지만 `Access-Control-Allow-Origin` 을 응답헤더에 포함시킨다고 서버에서 모든 크로스 오리진 요청을 단순히 받아드리지는 않는다. 요청에는 사실 두가지 종류로 나뉘며 첫번째는 단순한 읽기 요청 즉 GET 메서드 요청이고 다른 종류는 서버 사이드에서 상태 변경을 유발하는 요청 즉 GET 이외에 모든 요청이 있다 (POST, PUT, PATCH 등). 
+
+단순한 읽기 요청은 위에서 설명했던 시나리오가 적용이된다. 서버측에서 응답헤더에 `Access-Control-Allow-Origin` 을 포함시키면 클라이언트는 요청에 대한 응답을 받고 볼 수 있다.
+
+하지만 상태변경을 일으키는 요청에 대해서는 클라이언트가 요청을 보내는 방식이 조금 달라진다. 클라이언트는 먼저 preflight 이라는 요청을 보내게 되는데 이 요청은 서버에게 크로스 오리진 요청을 허용하는지에 대한 질문 같은 역할을 한다. 서버는 허용하는지에 대한 답변과 부가적인 요소에 (예를 들면 인증 i.e. are you a legitimate client?) 대한 정보를 담아 응답한다. 그리고 클라이언트는 그 응답을 기반으로 실제로 보내고자 했던 요청을 보낸다. 그래서 총 두번의 요청이 일어난다.
+
+# CSRF - Cross site request forgery
+CSRF 는 사용자의 의지와 인지에 상관없이 하나의 도메인에서 다른 도메인으로 요청을 보내는 해킹 공격이다.
+
+예를 들어 한 해커가 어그로용 가짜 뉴스 웹사이트를 만들어 배포하고 인터넷에 익명의 사용자가 검색결과 제목에 이끌려 해당 웹사이트로 유입되었다고 가정해보자. 해커는 자신의 웹사이트에 자바스크립트 코드를 작성하여 HTML 과 로드되도록 해놓았고 그 코드가 인스타그램에 광고용 게시물을 올리는 요청을 보낸다. 만약 사용자가 자신의 브라우져를 통해 인스타그램에 로그인된 상태라면 사용자 인증에 대한 정보는 브라우져 저장된 상태이기 때문에 해커가 심어놓은 요청이 이루어질 수 있는 환경이다. CSRF 공격은 이런식으로 이루어진다.
+
+물론 위에 예시의 중점은 CSRF 공격의 유형을 머리속으로 그릴 수 있도록 만든 것이다. 예전에는 이런식으로 공격이 쉽게 가능했지만 요즘은 다양한 메커니즘을 통해 이러한 현상을 방지한다.
+
+## CSRF Token
+서버측에서 임의 토큰 값을 생성하고 클라이언트와 공유한다. 클라이언트는 서버에 요청을 보낼때 마다 토크을 통해 인증 받아야 한다.
+
+## Refer Check
+클라이언트가 보내는 요청의 `request` 와 `referer` origin 값을 비교해 방지 할 수 있다.
+`request` 는 실제 일어나는 요청에 대한 URI 를 담고 있고 `referer` 는 해당 요청이 만들어지 출처의 origin 이다.
+
+즉 해커가 만든 https://www.awesomenews.com 에서 https://instagram.com 으로 요청이 보내지면 `request` 는 https://instagram.com 으로 시작하는 API 가 되고 `referer` 는 https://www.awesomenews.com 가 된다.
+
+## `SameSite` cookies
+쿠키 안에 `SameSite` 값을 통해 브라우져가 특정 웹사이트에서 요청을 보낼때 다른 웹사이트에서 사용하는 쿠키를 제외시키도록 설정 할 수 있다. 설정 가능한 값으로는 `Strict`, `Lax`, `None` 이 있다. 더 자세한 내용은 [MDN 공식문서](https://developer.mozilla.org/en-US/docs/Web/Security/Practical_implementation_guides/CSRF_prevention)에서 확인 가능하다.
