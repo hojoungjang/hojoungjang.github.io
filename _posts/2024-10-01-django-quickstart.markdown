@@ -233,6 +233,7 @@ admin.site.register(Question, QuestionAdmin)
 
 예를 들어
 ```
+{% raw %}
 {% if items_list %}
     <ul>
     {% for item in items_list %}
@@ -242,6 +243,7 @@ admin.site.register(Question, QuestionAdmin)
 {% else %}
     <p>No items are available.</p>
 {% endif %}
+{% endraw %}
 ```
 
 [템플릿 가이드](https://docs.djangoproject.com/en/5.1/topics/templates/)
@@ -288,7 +290,9 @@ There’s also a get_list_or_404() function, which works just as get_object_or_4
 
 ### URLconf 에 정의한 이름 가지고 URL 경로 참조하기
 ```html
+{% raw %}
 <li><a href="{% url 'detail' question.id %}">{{ question.question_text }}</a></li>
+{% endraw %}
 ```
 
 `url` 키워드 뒤에 URL 이름 붙이고 추가로 path param 붙이기
@@ -303,7 +307,9 @@ app_name = "polls"
 
 namespace 를 이용해서 템플릿 이름 참조
 ```html
+{% raw %}
 <li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
+{% endraw %}
 ```
 
 <네임스페이스:이름> 형태로 참조 가능
