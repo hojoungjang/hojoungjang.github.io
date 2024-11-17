@@ -14,29 +14,28 @@ HTTPS 는 HTTP 위에 SSL/TLS 프로토콜을 사용하고 이 프로토콜의 �
 
 그러므로 인증서는 클라이언트와 서버 간 아이덴티티 검증을 도와주고 man-in-the-middle attack 같은 공격을 방지할 수 있다.
 
-CA 는 하나만 있는게 아니라 여러개가 계층으로 나뉘어 존재한다. 이것 또한 보안과 효울성을 높인 디자인적인 요소이다. 
+CA 는 하나만 있는게 아니라 여러개가 계층으로 나뉘어 존재한다. 이것 또한 보안과 효율성을 높인 디자인적인 요소이다. 
 제일 위에 여러 root CA 가 있고 그리고 그 밑으로 여러 intermeidate CA 트리형태로 조직도를 그린다.
 모든 CA 의 신뢰성 (Trust) 은 root 에서 아래 방향으로 intermediate CA 에게 계승이 된다. 
 Root CA 는 바로 아래있는 intermediate CA 가 발급하는 인증서의 효력을 부여하고 이 관계는 제일 하단에 존재하는 leaf CA 까지 적용이된다. 
 
 인증서의 유효성 검증 과정은 반대방향으로 진행이된다. 인증서를 발급한 CA 를 시작으로 root CA 에 도달할때까지 검증은 계속된다.
+인증서 검증을 시작으로 해당 인증서를 발급한 CA 그리고 그 CA 의 인증서를 서명한 상위 CA 로 root CA 에 도달할때까지 진행된다.
 
-인증서를 검증을 시작으로 해당 인증서를 발급한 CA 그리고 그 CA 의 인증서를 서명한 상위 CA 로 root CA 에 도달할때까지 진행된다.
-
-그리고 이 보안성을 완성하는건 바로 root CA 의 인증서는 우리가 사용하는 컴퓨터에 이미 존재하거나 또는 브라우저 설치시 딸려온다는 것이다.
-결국 모든 검증은 최종적으로 root CA 를 통하기 때문에 로컬에 root CA 를 가지고 있으므로써 통신에서 생기는 보안 취약점을 걱정할필요가 없다.
+그리고 이 과정의 보안성을 완성하는건 바로 root CA 의 인증서는 우리가 사용하는 컴퓨터에 이미 존재하거나 또는 브라우저 설치시 딸려온다는 것이다.
+결국 모든 검증은 최종적으로 root CA 를 통하기 때문에 로컬에 root CA 인증서를 가지고 있으므로써 별도의 통신을 통해 인증서를 불러오는 과정에서 생기는 보안 취약점을 걱정할필요가 없다.
 
 
 ## 인증서를 발급받는법?
 인증서 발급 방법은 다양하다. DigiCert 같은 유료 서비스를 사용할수도 있고 Let's Encrypt 같은 무료 서비스도 존재한다.
 Let's Encrypt 같은 경우 Certbot 같은 클라이언트 프로그램을 사용해 인증서 발급부터 재발급까지 자동화 할 수 있다.
-여기서 자세히 다루지는 않겠다.
+여기서 인증서 발급은 자세히 다루지는 않고 아래 예제를 위해 self-signed 인증서만 살펴보겠다.
 
-아래에서 간단한 예제를 위해 self-signed 인증서도 만들 수 있다는 보여주지만 실제 서비스에서 사용하기에는 적합하지 않다.
-그 이유는 본인이 본인의 유효성을 검증하는식이니 당연히 말이되지 않는다.
+예제를 위해 self-signed 인증서도 만들 수 있다는걸 보여주지만 실제 서비스에서 사용하기에는 적합하지 않다.
+그 이유는 뻔하게도 본인이 본인의 유효성을 검증하는식이니 인증서를 통해 이루고자하는 목적을 잃어버리기 때문이다.
 이런 인증서는 아래 예제처럼 테스트용으로 만들어 사용하는 정도다.
 
-## nginx 및 인증서를 사용해 HTTPS 로 서빙해보기
+## Nginx 및 인증서를 사용해 HTTPS 로 서빙해보기
 
 #### self-signed 인증서 만들기
 1. 개인키 생성 
@@ -67,6 +66,8 @@ Let's Encrypt 같은 경우 Certbot 같은 클라이언트 프로그램을 사�
     openssl x509 -req -days 3650 -in cert.csr -signkey cert.key -out cert.crt
     ```
 
+    위 커멘드를 뜯어보면 생성되는 인증서는 cert.crt 에 x509 형태로 365 일 동안 유효하다.
+
 ### 간단한 서버 어플리케이션 준비
 예제에서는 간단한 서버 어플리케이션을 작성해 도커 컨테이너로 실행했다. 실제 서비스 환경에서는 이 어플리케이션
 자리에 원하는 서비스를 끼워넣을수 있을것이다. 원하는 어플리케이션 코드로 대체가 가능하기 때문에 Go 에 관련된
@@ -75,122 +76,127 @@ Let's Encrypt 같은 경우 Certbot 같은 클라이언트 프로그램을 사�
 
 
 1. root 경로에서 헬로월드 리턴하는 서버
-```go
-package main
 
-import (
-	"fmt"
-	"net/http"
-)
+    ```go
+    package main
 
-func helloHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/" {
-		w.Header().Set("Content-Type", "text/plain")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintln(w, "Hello, World!")
-	}
-}
+    import (
+        "fmt"
+        "net/http"
+    )
 
-func main() {
-	http.HandleFunc("/", helloHandler)
+    func helloHandler(w http.ResponseWriter, r *http.Request) {
+        if r.URL.Path == "/" {
+            w.Header().Set("Content-Type", "text/plain")
+            w.WriteHeader(http.StatusOK)
+            fmt.Fprintln(w, "Hello, World!")
+        }
+    }
 
-	fmt.Println("Starting server on port 8080...")
-	http.ListenAndServe(":8080", nil)
-}
-```
+    func main() {
+        http.HandleFunc("/", helloHandler)
+
+        fmt.Println("Starting server on port 8080...")
+        http.ListenAndServe(":8080", nil)
+    }
+    ```
 
 2. 도커파일 생성: 서버 코드 도커 이미지로 빌드
-```Dockerfile
-FROM golang:alpine
 
-WORKDIR /app
+    ```Dockerfile
+    FROM golang:alpine
 
-COPY go.mod ./
+    WORKDIR /app
 
-RUN go mod download && go mod verify
+    COPY go.mod ./
 
-COPY . .
-RUN go build -o server
+    RUN go mod download && go mod verify
 
-CMD ["./server"]
+    COPY . .
+    RUN go build -o server
 
-```
+    CMD ["./server"]
+
+    ```
 
 ### Nginx 컨테이너 준비
 1. Nginx 설정 파일을 아래와 같이 생성해 주자.
 
-```nginx
-user  nginx;  # nginx 와 관련된 프로세스 유져/그룹 이름
-worker_processes  1;  # nginx worker 프로세스 개수
+    ```nginx
+    user  nginx;  # nginx 와 관련된 프로세스 유져/그룹 이름
+    worker_processes  1;  # nginx worker 프로세스 개수
 
-# 로그 파일 경로
-error_log  /var/log/nginx/error.log;
-pid        /var/run/nginx.pid;
+    # 로그 파일 경로
+    error_log  /var/log/nginx/error.log;
+    pid        /var/run/nginx.pid;
 
-# Nginx worker 설정
-events {
-    worker_connections  1024;  # worker 당 최대 연결 개수
-}
+    # Nginx worker 설정
+    events {
+        worker_connections  1024;  # worker 당 최대 연결 개수
+    }
 
-http {
-    server {
-        # SSL/TLS 설정
-        listen              443 ssl;
-        server_name         localhost;
-        ssl_certificate     /etc/ssl/certs/cert.crt;
-        ssl_certificate_key /etc/ssl/private/cert.key;
+    http {
+        server {
+            # SSL/TLS 설정
+            listen              443 ssl;
+            server_name         localhost;
+            ssl_certificate     /etc/ssl/certs/cert.crt;
+            ssl_certificate_key /etc/ssl/private/cert.key;
 
-        # Reverse Proxy 설정
-        location / {
-            proxy_pass http://go-server:8080;
+            # Reverse Proxy 설정
+            location / {
+                proxy_pass http://go-server:8080;
 
-            # 클라이언트가 보낸 요청 헤더를 어플리케이션에게 바톤터치하는 설정
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
+                # 클라이언트가 보낸 요청 헤더를 어플리케이션에게 바톤터치하는 설정
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
         }
     }
-}
-```
+    ```
 
 
 2. 도커파일 생성. 여기서 주의 할점은 개인키는 항상 외부로 부터 보호해주어야 한다. 
 
-    주의! 개인키를 공개 저장소에 올리지 말고 또한 빌드된 이미지도 공개적인 레지스트리에 올리면 안된다!
+    주의! 개인키를 공개 저장소에 올리지 말고 또한 빌드된 이미지도 공개적인 레지스트리에 올리면 개인키를 노출할 수 있다!
 
-```Dockerfile
-FROM nginx:latest
+    ```Dockerfile
+    FROM nginx:latest
 
-# 앞서 만든 인증서와 개인키를 잘 복사해 주자
-COPY cert.crt /etc/ssl/certs/cert.crt
-COPY cert.key /etc/ssl/private/cert.key
+    # 앞서 만든 인증서와 개인키를 잘 복사해 주자
+    COPY cert.crt /etc/ssl/certs/cert.crt
+    COPY cert.key /etc/ssl/private/cert.key
 
-# 앞서 만든 nginx 설정 파일도 잘 복사해 주자
-COPY nginx.conf /etc/nginx/nginx.conf
-```
+    # 앞서 만든 nginx 설정 파일도 잘 복사해 주자
+    COPY nginx.conf /etc/nginx/nginx.conf
+    ```
 
 ### 실행 및 접속
 이제 docker compose 를 통해 Nginx 와 서버 어플리케이션을 실행하자
 
 1. docker-compose.yml 작성
-```yml
-services:
-  go-server:
-    build: ./server
 
-  nginx-proxy:
-    build: ./nginx
-    ports:
-      - 8443:443
-```
+    ```yml
+    services:
+    go-server:
+        build: ./server
+
+    nginx-proxy:
+        build: ./nginx
+        ports:
+        - 8443:443
+    ```
 
 2. docker compose 실행
-```sh
-docker compose up --build
-```
+
+    ```sh
+    docker compose up --build
+    ```
 
 3. 이제 브라우저를 열어서 https://localhost:8443 접속
+
     잊지말자 우리가 사용한 인증서는 유효하지 않아서 경고창이 먼저 뜰것이다. 더보기 옵션을 펼처 사이트에 접속을 강행해보자.
     "Hello World" 메세지가 보이고 서버가 접속이 되는것을 확인할 수 있을 것이다.
 
