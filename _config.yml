@@ -171,6 +171,10 @@ exclude:
   - vendor/gems/
   - vendor/ruby/
   - _posts/2024-08-17-prologue.markdown
+
+  - about.markdown
+  - 404.html
+
   - "*.gem"
   - "*.gemspec"
   - docs
