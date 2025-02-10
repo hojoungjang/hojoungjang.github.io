@@ -2,7 +2,8 @@
 layout: post
 title:  "Spring 을 위한 Java 개발 셋업"
 date:   2025-01-02 12:20:00 +0900
-categories: Java
+categories: [기타]
+tags: [Java]
 ---
 
 2024년 말, 고민 끝에 복합적인 이유로 인해 나는 스프링을 공부해보기 시작했다.

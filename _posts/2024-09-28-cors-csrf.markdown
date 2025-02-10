@@ -2,7 +2,8 @@
 layout: post
 title:  "CORS & CSRF"
 date:   2024-09-19 14:14:00 +0900
-categories: web, security
+categories: [web, security]
+tags: []
 ---
 웹 프레임워크 배우다 보면 보안과 관련된 여러 약자를 마주하게 된다. 
 보통 요청이나 응답 헤더에서 볼 수 있는데 정확히 이해하고 있지 않아서 좀 더 알아보는 시간을 가졌다.

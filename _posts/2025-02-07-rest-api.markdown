@@ -2,7 +2,8 @@
 layout: post
 title:  "REST API"
 date:   2025-02-07 12:20:00 +0900
-categories: CS
+categories: [CS 지식]
+tags: [REST]
 ---
 # REST API
 웹개발자라면 REST API 를 이미 알고 있거나 사용해보았을것이다. 사실 개발자가 아니더라도

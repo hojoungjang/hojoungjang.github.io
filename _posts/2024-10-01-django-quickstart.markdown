@@ -2,7 +2,8 @@
 layout: post
 title:  "Django 살펴보기 (근데 이제 빠르게랑 간단하게를 곁들인...)"
 date:   2024-10-01 15:20:00 +0900
-categories: web python
+categories: [backend, web framework]
+tags: [python, django]
 ---
 토스 Next Developer 공채에 Python developer 포지션이 흥미있어보여서 지원하게 됬다.
 

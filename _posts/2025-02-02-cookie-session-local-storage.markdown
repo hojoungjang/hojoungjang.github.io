@@ -2,7 +2,8 @@
 layout: post
 title:  "쿠키, 세션 스토리지, 로컬 스토리지"
 date:   2025-02-02 12:20:00 +0900
-categories: CS
+categories: [CS 지식]
+tags: [browser, web]
 ---
 # 정의
 쿠키, 세션 스토리지, 로컬 스토리지 모두 브라우저에서 관리하고 사용하는 key-value 저장소이다.

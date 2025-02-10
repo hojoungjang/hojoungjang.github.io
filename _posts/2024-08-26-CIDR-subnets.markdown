@@ -2,7 +2,8 @@
 layout: post
 title:  "CIDR"
 date:   2024-08-26 16:07:00 +0900
-categories: network
+categories: [network]
+tags: [network]
 ---
 # CIDR (Classless Inter-domain Routing)
 발음부터 다양하다 CIDR, 씨더, 사이다, 등등...

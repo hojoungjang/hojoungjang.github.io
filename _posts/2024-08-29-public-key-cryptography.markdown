@@ -2,7 +2,8 @@
 layout: post
 title:  "Public Key Cryptography"
 date:   2024-08-29 16:07:00 +0900
-categories: security
+categories: [security, cryptography]
+tags: []
 ---
 # 비대칭 암호화 (asymmetric cryptography)
 비대칭 암호화에서는 public key 와 private key 가 존재한다.

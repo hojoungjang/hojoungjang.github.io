@@ -2,7 +2,8 @@
 layout: post
 title:  "프로세스와 스레드"
 date:   2025-02-01 12:20:00 +0900
-categories: CS
+categories: [CS 지식]
+tags: [OS]
 ---
 
 하루 하나씩 정리해보는 지식노트

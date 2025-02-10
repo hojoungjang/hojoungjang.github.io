@@ -2,7 +2,8 @@
 layout: post
 title:  "깃 커밋 메세지 수정"
 date:   2024-08-21 15:57:00 +0900
-categories: git
+categories: [기타]
+tags: [git]
 ---
 # 깃 커밋 메세지는 어떻게 수정할까?
 가끔 작업을 하다보면 깃 커밋 메세지를 수정해야 할 때가 있을 수 있다. 물론 커밋이 리모트에 푸쉬가 안되었다면 우리는 `git reset` 을 통해 다시 commit 을 하나 하나 할 수 있다.

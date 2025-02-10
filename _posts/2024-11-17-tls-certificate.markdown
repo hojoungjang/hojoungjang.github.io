@@ -2,7 +2,8 @@
 layout: post
 title:  "SSL/TLS 인증서"
 date:   2024-11-17 15:20:00 +0900
-categories: backend
+categories: [security]
+tags: []
 ---
 
 ## SSL/TLS 인증서
