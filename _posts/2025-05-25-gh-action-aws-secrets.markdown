@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Github Actions 에서 AWS 시크릿 더 안전하게 사용"
+title:  "Github Actions 에서 AWS 시크릿 안전하게 사용"
 date:   2025-05-25 12:00:00 +0900
 categories: [AWS, Github Actions]
 tags: []
